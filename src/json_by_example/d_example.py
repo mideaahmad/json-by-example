@@ -44,7 +44,7 @@ class ComplexDecoder(json.JSONDecoder):
 
 
 if __name__ == '__main__':
-    x = json.dumps(2 +1J, cls= ComplexEncoder)
+    x = json.dumps(2 + 1j, cls= ComplexEncoder)
     print(x) 
 
     y = json.loads(x, cls=ComplexDecoder)

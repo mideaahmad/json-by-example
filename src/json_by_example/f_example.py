@@ -77,7 +77,7 @@ data =  """{
             "minute": 23,
             "s": 51
         },
-        "samples:": [
+        "samples": [
             {
                 "__class": "complex",
                 "real": -2.0,
@@ -97,5 +97,43 @@ data =  """{
     }
 }"""
 
-
-        
+class ComplexEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, complex):
+            return  { 
+                     "__class":"complex",
+                     "real": obj.real,
+                     "imag": obj.imag
+                    }
+    
+        elif isinstance(obj, datetime):
+             return {
+                       "__class": "datetime",
+                       "y": obj.year,
+                       "month": obj.month,
+                       "d":obj.day,
+                       "h": obj.hour,
+                       "minute": obj.minute,
+                       "s": obj.second
+                      }
+          
+        else: 
+            return super().default(obj)
+class SignalDecoder(json.JSONDecoder):
+    def __init__(self):
+        json.JSONDecoder.__init__(self, object_hook=SignalDecoder.from_dict)  
+    @staticmethod
+    def from_dict(d):
+        if d.get("__class") == "complex":
+            return complex(d.get("real"), d.get("imag"))
+        elif d.get("__class") == "datetime":
+            return datetime(d["y"],d["month"],d["d"],d["h"],d["minute"],d["s"])  
+        return d # defaulting if not complex                
+                   
+if __name__ == '__main__':
+    x = json.loads(data, cls= SignalDecoder)
+    print(x) 
+    y = json.dumps(x, cls=ComplexEncoder, indent=4)
+    print(type(y))
+    print(y) 
+                  
